@@ -8,9 +8,9 @@ git remote add tsvlad           https://github.com/tsvlad/spbetu_os_2020_8383.gi
 # git remote add Pchooo           https://github.com/Pchooo/spbetu_os_2020_8383.git           # Кормщикова
 # git remote add kikos2359        https://github.com/kikos2359/spbetu_os_2020_8383.git        # Костарев
 # git remote add ???              https://github.com//spbetu_os_2020_8383.git                 # Курбанов
-# git remote add TxAnton          https://github.com/TxAnton/spbetu_os_2020_8383.git          # Ларин
+ git remote add TxAnton          https://github.com/TxAnton/spbetu_os_2020_8383.git          # Ларин
 # git remote add AlexxxMaxxx      https://github.com/AlexxxMaxxx/spbetu_os_2020_8383.git      # Максимов
-# git remote add MadAndrei        https://github.com/MadAndrei/spbetu_os_2020_8383.git        # Мирсков
+ git remote add MadAndrei        https://github.com/MadAndrei/spbetu_os_2020_8383.git        # Мирсков
 # git remote add Kirill-mol       https://github.com/Kirill-mol/spbetu_os_2020_8383.git       # Мололкин
 # git remote add VladisStep       https://github.com/VladisStep/spbetu_os_2020_8383.git       # Степанов
 # git remote add KaterinaSyrtsova https://github.com/KaterinaSyrtsova/spbetu_os_2020_8383.git # Сырцова

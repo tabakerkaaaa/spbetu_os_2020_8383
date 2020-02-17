@@ -6,9 +6,9 @@
 git fetch tsvlad
 # git fetch Pchooo
 # git fetch kikos2359
-# git fetch TxAnton
+git fetch TxAnton
 # git fetch AlexxxMaxxx
-# git fetch MadAndrei
+git fetch MadAndrei
 # git fetch Kirill-mol
 # git fetch VladisStep
 # git fetch KaterinaSyrtsova
