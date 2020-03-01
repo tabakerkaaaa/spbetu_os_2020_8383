@@ -1,5 +1,5 @@
 SSTACK SEGMENT STACK
-		   DW 128
+		   DW 128 dup(0)
 SSTACK  ENDS
 
 
