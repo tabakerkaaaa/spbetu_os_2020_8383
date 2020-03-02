@@ -1,13 +1,13 @@
-# git fetch olyaave
+git fetch olyaave
 # git fetch tabakerkaaaa
-# git fetch GlebDot
-# git fetch holyunchained
+git fetch GlebDot
+git fetch holyunchained
 # git fetch MilaIshanina
 git fetch TSVlad
-# git fetch Pchooo
+git fetch Pchooo
 git fetch kikos2359
 git fetch TxAnton
-# git fetch AlexxxMaxxx
+git fetch AlexxxMaxxx
 git fetch MadAndrei
 git fetch Kirill-mol
 git fetch VladisStep
