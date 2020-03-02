@@ -3,7 +3,7 @@
 # git fetch GlebDot
 # git fetch holyunchained
 # git fetch MilaIshanina
-git fetch tsvlad
+git fetch TSVlad
 # git fetch Pchooo
 git fetch kikos2359
 git fetch TxAnton

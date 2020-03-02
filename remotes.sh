@@ -4,7 +4,7 @@ git remote add origin           git@github.com:JAkutenshi/spbetu_os_2020_8383.gi
 # git remote add GlebDot          https://github.com/GlebDot/spbetu_os_2020_8383.git          # Бессуднов
 # git remote add holyunchained    https://github.com/holyunchained/spbetu_os_2020_8383.git    # Дейнега
 # git remote add MilaIshanina     https://github.com/MilaIshanina/spbetu_os_2020_8383.git     # Ишанина
-git remote add tsvlad           https://github.com/tsvlad/spbetu_os_2020_8383.git           # Колмыков
+git remote add TSVlad           https://github.com/TSVlad/spbetu_os_2020_8383.git           # Колмыков
 # git remote add Pchooo           https://github.com/Pchooo/spbetu_os_2020_8383.git           # Кормщикова
 git remote add kikos2359        https://github.com/kikos2359/spbetu_os_2020_8383.git        # Костарев
 # git remote add ???              https://github.com//spbetu_os_2020_8383.git                 # Курбанов
