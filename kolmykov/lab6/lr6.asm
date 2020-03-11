@@ -29,6 +29,7 @@ DATA SEGMENT
 	STR_END_CODE3 db "31h end$"
 	STR_BUTTON db 13, 10, "Button:  $"
 	COMMANDLINE_POS dw 0
+	STUPID_MASM2 db 0;
 DATA ENDS
 
 STACKK SEGMENT STACK
@@ -54,8 +55,11 @@ CODE SEGMENT
 		push CX
 		push DX
 		
-		mov BX, MEMORY_FREE	;Попытка освобождения
-		sub BX, PSP_SEGMENT
+		mov BX, offset STUPID_MASM	;Попытка освобождения
+		mov AX, offset STUPID_MASM2
+		add BX, AX
+		add BX, 20Fh
+		;sub BX, PSP_SEGMENT
 		mov CL, 4
 		shl BX, CL
 		mov AX, 4A00h
@@ -262,6 +266,7 @@ CODE SEGMENT
 	MAIN_END:
 		mov AX, 4C00h
 		int 21h
+	STUPID_MASM:
 CODE ENDS
 MEMORY_FREE SEGMENT
 MEMORY_FREE ENDS
