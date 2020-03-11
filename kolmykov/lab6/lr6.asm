@@ -58,10 +58,10 @@ CODE SEGMENT
 		mov BX, offset STUPID_MASM	;Попытка освобождения
 		mov AX, offset STUPID_MASM2
 		add BX, AX
-		add BX, 20Fh
+		add BX, 30Fh
 		;sub BX, PSP_SEGMENT
 		mov CL, 4
-		shl BX, CL
+		shr BX, CL
 		mov AX, 4A00h
 		int 21h
 		
