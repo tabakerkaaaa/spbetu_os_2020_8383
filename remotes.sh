@@ -1,6 +1,6 @@
 git remote add origin           git@github.com:JAkutenshi/spbetu_os_2020_8383.git
 git remote add olyaave          https://github.com/olyaave/spbetu_os_2020_8383.git          # Аверина
-# git remote add tabakerkaaaa     https://github.com/tabakerkaaaa/spbetu_os_2020_8383.git     # Бабенко
+git remote add tabakerkaaaa     https://github.com/tabakerkaaaa/spbetu_os_2020_8383.git     # Бабенко
 git remote add GlebDot          https://github.com/GlebDot/spbetu_os_2020_8383.git          # Бессуднов
 git remote add holyunchained    https://github.com/holyunchained/spbetu_os_2020_8383.git    # Дейнега
 git remote add MilaIshanina     https://github.com/MilaIshanina/spbetu_os_2020_8383.git     # Ишанина
