@@ -1,0 +1,369 @@
+CODE		SEGMENT	
+
+ASSUME 	CS:CODE, DS:CODE, ES:NOTHING, SS:NOTHING
+
+ORG		100H
+
+START:	JMP	BEGIN
+
+STR1	DB "Available Memory: $"
+STR2	DB " byte$"
+STR3	DB 0DH, 0AH, "Extended Memory: $"
+STR4	DB " kbyte$"
+STR5	DB 0DH, 0AH, "$"
+STR6	DB 0DH, 0AH, "MCB  $"
+STR7	DB 0DH, 0AH, "Other possessor:                $"
+STR8	DB 0DH, 0AH, "Possessor: $"
+STR9	DB "Free$"
+STR10 	DB "OS XMS UMB driver$"
+STR11 	DB "excluded upper driver memory$"
+STR12 	DB "MS DOS$"
+STR13 	DB "control block 386MAX UMB$"
+STR14 	DB "blocked 386MAX$"
+STR15 	DB "belongs 386MAX UMB$"
+STR16	DB 0DH, 0AH, "Size: $"
+STR17 	DB 0DH, 0AH, "Name possessor: $"
+STR18	DB 0DH, 0AH, "Error!$"
+STR19	DB 0DH, 0AH, "Memory free!$"
+STR20	DB 0DH, 0AH, "Memory received!$"
+
+WRITE  	PROC	NEAR
+
+       	PUSH 	AX
+       	MOV		AH, 09H
+		INT		21H
+		POP		AX 
+		RET
+
+WRITE  	ENDP
+
+TETRTOHEX	PROC	NEAR
+
+		AND		AL, 0FH
+		CMP		AL, 09H
+		JBE		NEXT
+      	ADD		AL, 07H
+
+       	NEXT: 	
+			ADD AL, 30H		
+
+		RET
+
+TETRTOHEX	ENDP
+
+BYTETOHEX	PROC	NEAR
+          	
+       	PUSH	CX
+      	MOV		AH, AL
+       	CALL	TETRTOHEX
+		XCHG	AL, AH
+		MOV		CL, 4H
+		SHR		AL, CL
+       	CALL	TETRTOHEX
+		POP		CX
+		RET
+
+BYTETOHEX	ENDP
+
+WRDTOHEX	PROC	NEAR
+
+		PUSH	BX
+		MOV 	BH, AH
+		CALL	BYTETOHEX
+		MOV		[DI], AH
+		DEC		DI
+		MOV		[DI], AL
+		DEC		DI
+		MOV		AL, BH
+		CALL	BYTETOHEX
+		MOV		[DI], AH
+		DEC		DI
+		MOV		[DI], AL
+		POP		BX
+		RET
+
+WRDTOHEX	ENDP
+
+BYTETODEC	PROC	NEAR
+
+		PUSH	CX
+		PUSH	DX
+		XOR		AH, AH
+		XOR 	DX, DX
+		MOV 	CX, 0AH
+
+      	BEG:   
+			DIV		CX
+          	OR 		DL, 30H
+          	MOV		[SI], DL
+			DEC		SI
+          	XOR		DX, DX
+          	CMP		AX, 0AH
+          	JAE		BEG
+          	CMP		AL, 00H
+          	JE		ENDL
+          	OR 		AL, 30H
+          	MOV		[SI], AL
+		   
+       	ENDL:     
+			POP		DX
+          	POP		CX
+        
+		RET
+
+BYTETODEC	ENDP
+
+		BEGIN:
+		
+        MOV 	AH, 4AH
+		MOV 	BX, 0FFFFH
+	    INT 	21H
+
+		MOV 	AX, BX
+
+		MOV 	DX, OFFSET STR1
+		CALL 	WRITE
+
+		MOV 	BX, 10H
+		MUL 	BX
+		MOV 	BX, 0AH
+		XOR 	CX, CX
+			
+		DIVISION:
+			DIV		BX
+			PUSH	DX
+			INC 	CX
+			XOR		DX, DX
+			CMP 	AX, 0H
+		JNZ	DIVISION
+	
+		PRINTNUMBER:
+			POP		DX
+			OR 		DL, 30H
+			MOV 	AH, 02H
+			INT 	21H
+		LOOP 	PRINTNUMBER
+		  
+		MOV		DX, OFFSET STR2
+		CALL	WRITE
+
+		MOV		BX, 1000H
+		MOV		AH, 48H
+		INT		21H
+		JNC		NORM2
+		MOV		DX, OFFSET STR18
+		CALL	WRITE
+		JMP		ENDPROG
+
+		NORM2:
+			MOV		DX, OFFSET STR20
+			CALL 	WRITE
+
+		MOV		BX, OFFSET RESERVE
+		ADD		BX, 10FH
+		MOV		CL, 4H
+		SHR		BX, CL
+		MOV		AH, 4AH
+		INT		21H
+		JNC		NORM
+		MOV		DX, OFFSET STR18
+		CALL 	WRITE
+		JMP		ENDPROG
+
+		NORM:
+			MOV	DX, OFFSET STR19
+			CALL	WRITE
+
+		MOV 	AL, 30H
+    	OUT		70H, AL
+    	IN 		AL, 71H
+    	MOV 	BL, AL
+    	MOV 	AL, 31H
+    	OUT 	70H, AL
+    	IN 		AL, 71H
+		MOV		BH, AL
+
+		MOV		AX, BX
+		MOV		DX, OFFSET	STR3
+		CALL	WRITE
+
+		MOV 	BX, 0AH
+		XOR 	CX, CX
+		XOR		DX, DX
+			
+		DIVISION2:
+			DIV		BX
+			PUSH	DX
+			INC 	CX
+			XOR		DX, DX
+			CMP 	AX, 0H
+		JNZ		DIVISION2
+	
+		PRINTNUMBER2:
+			POP		DX
+			OR 		DL, 30H
+			MOV 	AH, 02H
+			INT 	21H
+		LOOP 	PRINTNUMBER2
+		  
+		MOV		DX, OFFSET STR4
+		CALL	WRITE 
+		
+		MOV 	AH, 52H
+		INT		21H
+		MOV 	AX, ES:[BX-2]
+		MOV 	ES, AX
+		
+		XOR		CX, CX
+		INC		CX
+
+		NEXTMCB:
+		MOV 	DX, OFFSET STR5
+		CALL 	WRITE
+		MOV		SI, OFFSET STR6
+		ADD 	SI, 6H
+		MOV 	AL, CL
+		PUSH 	CX
+		CALL 	BYTETODEC 
+		MOV 	DX, OFFSET STR6
+		CALL 	WRITE
+	
+		XOR 	AH, AH
+		MOV 	AL, ES:[0H]
+		PUSH 	AX
+		MOV 	AX, ES:[1H]
+		CMP 	AX, 0000H
+		JE 	PR1
+		CMP 	AX, 0006H
+		JE 	PR2
+		CMP 	AX, 0007H
+		JE 	PR3
+		CMP 	AX, 0008H
+		JE 	PR4
+		CMP 	AX, 0FFFAH
+		JE 	PR5
+		CMP 	AX, 0FFFDH
+		JE 	PR6
+		CMP 	AX, 0FFFEH
+		JE 	PR7
+		
+       	MOV 	DI, OFFSET STR7
+		ADD 	DI, 16H
+		CALL 	WRDTOHEX 
+		MOV 	DX, OFFSET STR7
+		CALL 	WRITE
+		JMP	WRITESIZE
+	
+       	PR1:
+		MOV 	DX, OFFSET STR8
+		CALL 	WRITE
+		MOV 	DX, OFFSET STR9
+		CALL 	WRITE 
+		JMP 	WRITESIZE	
+       	
+		PR2:
+		MOV 	DX, OFFSET STR8
+		CALL 	WRITE
+		MOV 	DX, OFFSET STR10
+		CALL 	WRITE 
+		JMP 	WRITESIZE 
+	
+       	PR3:
+		MOV 	DX, OFFSET STR8
+		CALL 	WRITE
+		MOV 	DX, OFFSET STR11
+		CALL 	WRITE 
+		JMP 	WRITESIZE	
+
+       	PR4:
+		MOV 	DX, OFFSET STR8
+		CALL 	WRITE
+		MOV 	DX, OFFSET STR12
+		CALL 	WRITE 
+		JMP 	WRITESIZE	
+
+       	PR5:
+       	MOV 	DX, OFFSET STR8
+		CALL 	WRITE
+		MOV 	DX, OFFSET STR13
+		CALL 	WRITE 
+       	JMP 	WRITESIZE 
+		
+       	PR6:
+      	MOV 	DX, OFFSET STR8
+		CALL 	WRITE
+		MOV 	DX, OFFSET STR14
+		CALL 	WRITE 
+       	JMP 	WRITESIZE 
+	
+       	PR7:
+       	MOV 	DX, OFFSET STR8
+		CALL 	WRITE
+		MOV 	DX, OFFSET STR15
+		CALL 	WRITE 
+
+       	WRITESIZE:
+		MOV 	AX, ES:[3H]	
+		MOV 	DX, OFFSET STR16
+		CALL 	WRITE
+
+		MOV 	BX, 10H
+		MUL 	BX
+		MOV 	BX, 0AH
+		XOR 	CX, CX
+		
+		DIVISION3:
+			DIV		BX
+			PUSH	DX
+			INC 	CX
+			XOR		DX, DX
+			CMP 	AX, 0H
+		JNZ	DIVISION3
+
+		PRINTNUMBER3:
+			POP		DX
+			OR 		DL, 30H
+			MOV 	AH, 02H
+			INT 	21H
+		LOOP 	PRINTNUMBER3
+
+		MOV 	DX, OFFSET STR2
+		CALL 	WRITE
+		
+       	MOV 	DX, OFFSET STR17 
+		CALL 	WRITE
+		MOV 	CX, 8H
+		XOR 	DI, DI
+	
+       	PRINTL:
+			MOV 	DL, ES:[DI+8H]
+			MOV 	AH, 02H
+			INT 	21H
+			INC 	DI
+		LOOP 	PRINTL	
+
+       	MOV		AX, ES:[3H]	
+		MOV 	BX, ES
+		ADD 	BX, AX
+		INC 	BX
+		MOV 	ES, BX
+		POP 	AX
+		POP 	CX
+		INC 	CX
+		CMP 	AL, 5AH
+		JE 		ENDPROG
+		MOV 	DX, OFFSET STR5
+		CALL	WRITE
+		JMP 	NEXTMCB
+
+		ENDPROG:
+		XOR	AL, AL
+		MOV	AH, 4CH
+		INT	21H
+
+		RESERVE: DW 128 DUP(0)
+
+
+CODE		ENDS
+END 		START
+
