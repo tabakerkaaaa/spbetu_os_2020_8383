@@ -1,0 +1,213 @@
+CODE      	SEGMENT      
+
+STACKFORINT	DW 100H DUP (?)     
+
+		ASSUME CS:CODE, DS:DATA, SS:STACKK 
+
+BEGININT:
+ADDRESS 	DD 	?
+SIGNATURA 	DW 	0FEFEH
+FORREMOVE	DW	?
+
+CHANGECHAR 	PROC	FAR            
+
+		JMP 	BODY
+		FORAX	DW ?
+		FORSS	DW ?
+		FORSP	DW ?
+		SYMB 	DB ? 
+		
+		BODY:
+		MOV	FORAX, AX
+		MOV	FORSS, SS
+		MOV	FORSP, SP
+		MOV 	AX, CS
+		MOV 	SS, AX 
+		MOV 	SP, OFFSET STACKFORINT + 200H
+		MOV 	AX, FORAX
+		PUSH 	AX
+		PUSH 	BX
+		PUSH 	CX
+		PUSH 	DX
+		PUSH 	ES
+
+		IN 	AL, 60H
+		CMP 	AL, 11H 
+		JE 	W
+		CMP	AL, 1FH
+		JE	S
+		CMP	AL, 17H
+		JE	I
+	
+		PUSHF
+		CALL 	DWORD PTR CS:ADDRESS 
+		JMP 	FINISH 
+	
+		W:
+		MOV	SYMB, 7AH
+		JMP	START
+		S:
+		MOV	SYMB, 63H
+		JMP	START
+		I:
+		MOV	SYMB, 21H
+		
+		START:
+		IN 	AL, 61h   
+		MOV 	AH, AL    
+		OR 	AL, 80H    
+		OUT 	61H, AL  
+		XCHG 	AH, AL    
+		OUT 	61H, AL    
+		MOV 	AL, 20H     
+		OUT 	20H, AL     
+		
+		BUFF:
+		MOV 	AH, 05H
+		MOV 	CL, SYMB
+		MOV 	CH, 00H
+		INT 	16H
+		OR 	AL, AL
+		JZ 	FINISH 
+		MOV 	AX, 0040H
+		MOV 	ES, AX
+		MOV 	AX, ES:[1AH]
+		MOV 	ES:[09H], AX
+		JMP 	BUFF
+	
+		FINISH:
+		MOV 	AL, 20H
+		OUT 	20H, AL
+		POP	ES
+		POP 	DX
+		POP 	CX
+		POP 	BX
+		POP 	AX
+		MOV 	AX, FORSS
+		MOV 	SS, AX
+		MOV 	AX, FORAX
+ 		MOV 	SP, FORSP
+		IRET     
+
+CHANGECHAR 	ENDP
+ENDINT:
+
+WRITE  	PROC	NEAR
+
+       		PUSH	AX
+       		MOV	AH, 09H
+          	INT	21H
+		POP 	AX 
+          	RET
+
+WRITE  	ENDP
+
+Main		PROC	FAR           
+
+		MOV 	AX, DATA		  
+		MOV 	DS, AX
+		MOV 	AX, ES
+		MOV 	FORREMOVE, AX							
+	
+		MOV 	AL, 09H
+		MOV 	AH, 35H
+		INT	21H
+		MOV	DX, ES:[BX-4H]
+		CMP 	DX, SIGNATURA
+		JE 	ISREMOVE 
+
+		MOV 	AL, 09H
+		MOV 	AH, 35H
+		INT	21H
+		MOV 	WORD PTR ADDRESS, BX
+		MOV 	WORD PTR ADDRESS + 2H, ES
+		PUSH 	DS
+		MOV 	DX, OFFSET CHANGECHAR
+		MOV 	AX, SEG CHANGECHAR
+		MOV 	DS, AX
+		MOV 	AL, 09H
+		MOV 	AH, 25H
+		INT 	21H
+		POP	DS
+	
+		MOV 	DX, OFFSET STR1
+		CALL 	WRITE
+
+		MOV	DX, OFFSET ENDINT
+		ADD 	DX, 10FH
+       		MOV 	CL, 4H
+		SHR 	DX, CL
+		INC	DX
+		MOV 	AH, 31H
+		INT 	21H 
+		JMP	ENDPROG
+
+		ISREMOVE:
+		MOV	AX, FORREMOVE 
+		MOV	ES, AX
+		CMP	BYTE PTR ES:[82H], '/'
+		JNE	SKIP 
+		CMP	BYTE PTR ES:[83H], 'u'
+		JNE	SKIP 
+		CMP	BYTE PTR ES:[84H], 'n'
+		JNE	SKIP 
+		JMP 	REMOVECHANGECHAR
+		
+		SKIP:
+		MOV 	DX, OFFSET STR2
+		CALL 	WRITE
+		JMP 	ENDPROG 
+
+		REMOVECHANGECHAR:
+
+		MOV 	DX, OFFSET STR3
+		CALL 	WRITE
+
+		MOV 	AL, 09H
+		MOV 	AH, 35H
+		INT  	21H
+		MOV 	DX, WORD PTR ES:ADDRESS
+		MOV 	AX, WORD PTR ES:ADDRESS + 2H
+		MOV 	WORD PTR ADDRESS, DX
+		MOV 	WORD PTR ADDRESS + 2H, AX
+		CLI
+		PUSH 	DX
+		MOV 	DX, WORD PTR ADDRESS 
+		MOV 	AX, WORD PTR ADDRESS + 2H
+		MOV  	DS, AX
+		MOV  	AH, 25H
+		MOV  	AL, 09H
+		INT  	21H
+		POP	DS
+		STI
+
+		MOV 	ES, ES:FORREMOVE
+		MOV 	AH, 49H
+		INT 	21H
+		MOV 	ES, ES:[2CH]
+		MOV 	AH, 49H
+		INT 	21H
+	
+		ENDPROG:
+		MOV 	AH, 4CH
+		INT 	21H
+
+Main		ENDP	
+CODE      	ENDS 
+
+DATA		SEGMENT
+
+STR1 		DB "Resident loaded into memory!", 0DH, 0AH, "$"
+STR2 		DB "Resident in memory!", 0DH, 0AH, "$"
+STR3 		DB "Resident removed from memory!", 0DH, 0AH, "$"
+
+DATA      	ENDS 
+
+STACKK	SEGMENT	STACK           
+
+DW 		100H DUP(?)
+
+STACKK    	ENDS  
+
+       	END	Main
+
