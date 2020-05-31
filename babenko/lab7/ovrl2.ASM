@@ -2,7 +2,6 @@ CODE      	SEGMENT
 
 		ASSUME CS:CODE, DS:NOTHING, SS:NOTHING
 
-;главная процедура
 MAIN		PROC	FAR           
 
 		PUSH	AX
@@ -28,7 +27,6 @@ MAIN		PROC	FAR
 
 MAIN		ENDP	
 
-;процедура печати строки
 WRITE  	PROC	NEAR
 
        	PUSH	AX
@@ -39,7 +37,6 @@ WRITE  	PROC	NEAR
 
 WRITE  	ENDP
 
-;процедура получения символа в 16 с/c
 TETRTOHEX	PROC	NEAR
 
           	AND	AL, 0FH
@@ -53,7 +50,6 @@ TETRTOHEX	PROC	NEAR
 
 TETRTOHEX	ENDP
 
-;процедура перевода байта в AL в два символа 16 с/c в AX
 BYTETOHEX	PROC	NEAR
           	
        	PUSH	CX
@@ -68,7 +64,6 @@ BYTETOHEX	PROC	NEAR
 
 BYTETOHEX	ENDP
 
-;процедура записи 16-ти разрядного числа в 16 с/c в строку
 WRDTOHEX	PROC	NEAR
 
           	PUSH	BX
