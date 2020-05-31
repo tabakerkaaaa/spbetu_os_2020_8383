@@ -1,0 +1,318 @@
+DATA		SEGMENT
+
+STR1 		DB "Error function 4AH!", 0DH, 0AH, "$"
+STR2 		DB "Invalid memory block address!", 0DH, 0AH, "$"
+STR3 		DB "Control memory block destroyed!", 0DH, 0AH, "$"
+STR4 		DB "Not memory!", 0DH, 0AH, "$"
+STR5 		DB "Error function 4EH!", 0DH, 0AH, "$"
+STR6 		DB "Route not found!", 0DH, 0AH, "$"
+STR7 		DB "File not found!", 0DH, 0AH, "$"
+STR8 		DB "Error function 4B03H!", 0DH, 0AH, "$"
+STR9 		DB "Wrong environment!", 0DH, 0AH, "$"
+STR10 	DB "Non-existent function!", 0DH, 0AH, "$"
+STR11 	DB "Too many open files!", 0DH, 0AH, "$"
+STR12 	DB "No access!", 0DH, 0AH, "$"
+STR13 	DB "Little memory!", 0DH, 0AH, "$"
+
+OVRL1		DB "ovrl1", 0H
+OVRL2		DB "ovrl2", 0H
+PATH   	DB 50H DUP(0H)
+DTA 		DB 2BH DUP(0H)
+SEGOVRL	DW ?
+CALLOVRL	DD 0H
+
+DATA      	ENDS 
+
+CODE      	SEGMENT      
+
+		ASSUME CS:CODE, DS:DATA, SS:STACKK 
+
+FREEMEMORY	PROC	NEAR
+
+		PUSH	AX
+		PUSH	BX
+		PUSH	DX
+
+		MOV	AX, STACKK
+		SUB	AX, DATA
+		ADD	AX, 100H
+		MOV	BX, AX
+		MOV	AH, 4AH
+		MOV	AL, 00H
+		INT	21H
+		
+		JNC	ENDFREEMEMORY 
+
+		MOV 	DX, OFFSET STR1 
+		CALL 	WRITE
+
+		CMP	AX, 7H
+		JE	ERROR1
+		CMP	AX, 8H
+		JE	ERROR2
+		
+		MOV 	DX, OFFSET STR2
+		CALL 	WRITE
+		JMP	ENDFREEMEMORY 
+		ERROR1:
+		MOV 	DX, OFFSET STR3 
+		CALL 	WRITE
+		JMP	ENDFREEMEMORY 
+		ERROR2:
+		MOV 	DX, OFFSET STR4 
+		CALL 	WRITE
+		JMP	ENDFREEMEMORY
+
+		ENDFREEMEMORY:
+		POP	DX
+		POP	BX
+		POP	AX
+		RET
+
+FREEMEMORY	ENDP
+
+PATHCONSTR	PROC	NEAR
+
+		PUSH	AX
+		PUSH	BX
+		PUSH	CX
+		PUSH	SI
+		PUSH	DI
+		PUSH	ES
+		
+		MOV	ES, ES:[2CH]
+		MOV	BX, 0H
+		MOV	CX, 2H
+		
+		BEG:
+		INC	CX
+		MOV	AL, ES:[BX]
+		INC	BX
+		CMP	AL, 0H
+		JZ	CHECK
+		LOOP	BEG 
+		
+		CHECK:
+		CMP	BYTE	PTR ES:[BX], 0H
+		JNZ	BEG 
+		ADD	BX, 3H
+		MOV	SI, OFFSET PATH
+		
+       	WRITEL:
+		MOV	AL, ES:[BX]
+		MOV	[SI], AL
+		INC	SI
+		INC	BX
+		CMP	AL, 0H
+		JZ	ENDPATH
+		JMP	WRITEL 
+	
+       	ENDPATH:	
+		SUB	SI, 9H
+		MOV	DI, BP
+		
+       	CREATE:
+		MOV	AH, [DI]
+		MOV	[SI], AH
+		CMP	AH, 0H
+		JZ	ENDPATHCONSTR 
+		INC	DI
+		INC	SI
+		JMP	CREATE
+	
+       	ENDPATHCONSTR:
+       	POP	ES
+       	POP	DI
+       	POP	SI
+       	POP	CX
+       	POP	BX
+       	POP	AX
+       	RET
+
+PATHCONSTR	ENDP
+
+MEMORYOVRL	PROC	NEAR
+
+		PUSH	AX
+		PUSH	BX
+		PUSH	CX
+		PUSH	DX
+       	PUSH	SI
+       	PUSH	ES 
+       
+		MOV 	DX, OFFSET DTA 
+		MOV 	AX, 1A00H
+		INT 	21H
+		
+		MOV 	CX, 0H
+		MOV 	DX, OFFSET PATH
+		MOV 	AX, 4E00H
+       	INT	21H
+		
+		JNC	SIZEOVRL
+		
+       	MOV 	DX, OFFSET STR5
+		CALL 	WRITE
+		
+		CMP 	AX, 2H
+		JE 	ERROR3
+		
+		MOV 	DX, OFFSET STR6
+		CALL	WRITE
+		JMP 	ENDMEMORYOVRL 
+		
+       	ERROR3:
+		MOV 	DX, OFFSET STR7
+		CALL 	WRITE
+		JMP 	ENDMEMORYOVRL 
+		
+       	SIZEOVRL:
+		MOV	SI, OFFSET DTA
+		ADD 	SI, 1CH
+		MOV 	BX, [SI - 2H] 
+		MOV	CL, 4H
+		SHR 	BX, CL
+		MOV 	AX, [SI]
+		MOV	CL, 0CH
+		SAL 	AX, CL 
+		ADD	BX, AX 
+		ADD	BX, 2H		
+		
+		MOV	AX, 4800H 
+		INT	21H 
+		MOV	SEGOVRL, AX	
+       
+       	ENDMEMORYOVRL:
+       	POP	ES
+       	POP	SI
+       	POP	DX
+       	POP	CX
+       	POP	BX
+       	POP	AX
+       	RET
+
+MEMORYOVRL	ENDP
+
+OVRL		PROC	NEAR
+
+		PUSH	AX
+		PUSH	BX
+		PUSH	CX
+		PUSH	DX
+		PUSH	BP
+		PUSH	ES
+
+		MOV	BX, DS 
+		MOV	ES, BX
+		MOV	BX, OFFSET SEGOVRL 
+		MOV	DX, OFFSET PATH
+		MOV 	AX, 4B03H	
+		INT 	21H
+	
+		JNC 	FINALITY
+
+		MOV 	DX, OFFSET STR8
+		CALL 	WRITE 
+
+		CMP 	AX, 1H
+		JE 	ERROR4
+		CMP 	AX, 2H
+		JE 	ERROR5
+		CMP 	AX, 3H
+		JE 	ERROR6
+		CMP 	AX, 4H
+		JE 	ERROR7
+		CMP 	AX, 5H
+		JE 	ERROR8
+		CMP 	AX, 8H
+		JE 	ERROR9
+	
+		MOV 	DX, OFFSET STR9
+		CALL 	WRITE
+		JMP 	ENDOVRL 
+       	ERROR4:
+		MOV 	DX, OFFSET STR10
+		CALL 	WRITE
+		JMP 	ENDOVRL 
+       	ERROR5:
+		MOV 	DX, OFFSET STR7
+		CALL 	WRITE
+		JMP 	ENDOVRL 	
+       	ERROR6:
+		MOV 	DX, OFFSET STR6
+		CALL 	WRITE
+		JMP 	ENDOVRL	
+       	ERROR7:
+		MOV 	DX, OFFSET STR11
+		CALL 	WRITE
+		JMP 	ENDOVRL	
+       	ERROR8:
+		MOV 	DX, OFFSET STR12
+		CALL 	WRITE
+		JMP 	ENDOVRL	
+		ERROR9:
+		MOV 	DX, OFFSET STR13
+		CALL 	WRITE
+		JMP 	ENDOVRL	
+
+		FINALITY:
+		MOV	AX, SEGOVRL 
+		MOV	WORD PTR CALLOVRL + 2H, AX
+		CALL	CALLOVRL 
+		MOV	ES, AX
+		MOV	AX, 4900H
+		INT	21H
+
+		ENDOVRL: 
+		POP	ES
+		POP	BP
+		POP	DX
+		POP	CX
+		POP	BX
+		POP	AX
+		RET
+
+OVRL		ENDP
+
+
+WRITE  	PROC	NEAR
+
+       	PUSH	AX
+       	MOV	AH, 09H
+          	INT	21H
+		POP 	AX 
+          	RET
+
+WRITE  	ENDP
+
+MAIN		PROC	FAR           
+
+		MOV 	AX, DATA		  
+		MOV 	DS, AX
+
+		CALL	FREEMEMORY
+		MOV	BP, OFFSET OVRL1
+		CALL	PATHCONSTR
+		CALL	MEMORYOVRL
+       	CALL	OVRL
+       
+		MOV	BP, OFFSET OVRL2
+		CALL	PATHCONSTR
+		CALL	MEMORYOVRL
+       	CALL	OVRL
+
+		ENDPROG:
+		MOV 	AH, 4CH
+		INT 	21H
+
+MAIN		ENDP	
+CODE      	ENDS 
+
+STACKK	SEGMENT	STACK           
+
+DW 		100H DUP(?)
+
+STACKK    	ENDS  
+
+       	END	MAIN
+
