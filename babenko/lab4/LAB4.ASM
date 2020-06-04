@@ -77,6 +77,7 @@ INTCOUNT 	PROC	FAR
 		FORAX	DW ?
 		FORSS	DW ?
 		FORSP 	DW ?
+		NUMBER 	DB 0
 		
 		BODY:
 		MOV		FORAX, AX
@@ -251,7 +252,6 @@ DATA		SEGMENT
 STR1 		DB "Resident loaded into memory!", 0DH, 0AH, "$"
 STR2 		DB "Resident in memory!", 0DH, 0AH, "$"
 STR3 		DB "Resident removed from memory!", 0DH, 0AH, "$"
-NUMBER 	DB 0
 
 DATA      	ENDS 
 
